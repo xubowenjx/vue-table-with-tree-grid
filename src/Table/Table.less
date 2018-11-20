@@ -77,6 +77,14 @@
 
 .@{prefixCls}__cell-inner {
   padding: 6px 12px;
+  // white-space: nowrap;
+  //   overflow: hidden;
+  //   text-overflow: ellipsis;
+}
+.ellipsis{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .@{prefixCls}--firstProp-header-inner {
@@ -113,9 +121,12 @@
   }
 }
 
-.@{prefixCls}--tree-icon {
+.@{prefixCls}  .ivu-icon{
   margin-right: 6px;
   cursor: pointer;
+  line-height: 14px;
+  font-size: 14px;
+  vertical-align: inherit;
 }
 
 .@{prefixCls}--expand-inner {
