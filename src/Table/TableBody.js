@@ -217,8 +217,8 @@ export default {
             paddingLeft: row._childrenLen === 0 ? '20px' : '',
           }}>
             { row._childrenLen > 0 &&
-              <i
-                class={ `${this.prefixCls}--tree-icon zk-icon zk-icon-${row._isFold ? 'plus' : 'minus'}-square-o`}
+              <i 
+                class={ `ivu-icon ivu-icon-ios-arrow-${row._isFold ? 'forward' : 'down'}`}
                 on-click={ $event => this.handleEvent($event, 'icon', { row, rowIndex, column, columnIndex }, { isFold: row._isFold }) }></i>
             }
             { row[column.prop] ? row[column.prop] : '' }
@@ -229,7 +229,10 @@ export default {
         return '';
       }
       if (column.type === undefined || column.type === 'custom') {
-        return row[column.prop];
+        return  row[column.prop];
+      }
+      else if (column.type === 'ellipsis') {
+        return <div class='ellipsis' title={row[column.prop]}>{row[column.prop]}</div>;
       } else if (column.type === 'template') {
         return this.table.$scopedSlots[column.template]
         ? this.table.$scopedSlots[column.template]({ row, rowIndex, column, columnIndex })
