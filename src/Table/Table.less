@@ -1,9 +1,9 @@
-@import "./font/iconfont";
+@import './font/iconfont';
 
 // text
 @prefixCls: zk-table;
 // color
-@black: #1F2D3D;
+@black: #1f2d3d;
 @white: #ffffff;
 @border: #e9eaec;
 @hoverRow: #ebf7ff;
@@ -77,11 +77,12 @@
 
 .@{prefixCls}__cell-inner {
   padding: 6px 12px;
-  // white-space: nowrap;
-  //   overflow: hidden;
-  //   text-overflow: ellipsis;
+  & > span {
+    cursor: pointer;
+  }
 }
-.ellipsis{
+
+.ellipsis {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -121,18 +122,16 @@
   }
 }
 
-.@{prefixCls}  .ivu-icon{
+.@{prefixCls} .ivu-icon {
   margin-right: 6px;
   cursor: pointer;
-  line-height: 14px;
   font-size: 14px;
-  vertical-align: inherit;
 }
 
 .@{prefixCls}--expand-inner {
   text-align: center;
   cursor: pointer;
-  transition: transform .2s ease-in-out;
+  transition: transform 0.2s ease-in-out;
 }
 
 .@{prefixCls}--expanded-inner {
