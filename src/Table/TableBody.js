@@ -6,9 +6,7 @@ export default {
   name: 'zk-table__body',
   mixins: [mixins],
   data() {
-    return {
-
-    };
+    return {};
   },
   computed: {
     table() {
@@ -37,19 +35,21 @@ export default {
       if (len > 0) {
         for (let i = 0; i < len; i++) {
           const childData = data[childrenIndex[i]];
-          if (
-            childData._childrenLen &&
-            (!careFold || (careFold && !childData._isFold))
-          ) {
+          if (childData._childrenLen && (!careFold || (careFold && !childData._isFold))) {
             childrenIndex = childrenIndex.concat(
-              this.getChildrenIndex(childData._level, childrenIndex[i], careFold));
+              this.getChildrenIndex(childData._level, childrenIndex[i], careFold),
+            );
           }
         }
       }
       return childrenIndex;
     },
     handleEvent($event, type, data, others) {
-      const certainType = this.validateType(type, ['cell', 'row', 'checkbox', 'icon'], 'handleEvent');
+      const certainType = this.validateType(
+        type,
+        ['cell', 'row', 'checkbox', 'icon'],
+        'handleEvent',
+      );
       const eventType = $event ? $event.type : '';
       const { row, rowIndex, column, columnIndex } = data;
       const latestData = this.table.bodyData;
@@ -63,7 +63,13 @@ export default {
             this.toggleStatus('Checked', latestData[childrenIndex[i]], childrenIndex[i], isChecked);
           }
         }
-        return this.table.$emit('checkbox-click', latestData[rowIndex], column, columnIndex, $event);
+        return this.table.$emit(
+          'checkbox-click',
+          latestData[rowIndex],
+          column,
+          columnIndex,
+          $event,
+        );
       }
       // Tree's icon
       if (certainType.icon) {
@@ -73,13 +79,25 @@ export default {
         for (let i = 0; i < childrenIndex.length; i++) {
           this.toggleStatus('Hide', latestData[childrenIndex[i]], childrenIndex[i]);
         }
-        return this.table.$emit('tree-icon-click', latestData[rowIndex], column, columnIndex, $event);
+        return this.table.$emit(
+          'tree-icon-click',
+          latestData[rowIndex],
+          column,
+          columnIndex,
+          $event,
+        );
       }
       if (certainType.cell && eventType === 'click') {
         // 点击扩展单元格
         if (this.isExpandCell(this.table, columnIndex)) {
           this.toggleStatus('Expanded', row, rowIndex);
-          return this.table.$emit('expand-cell-click', latestData[rowIndex], column, columnIndex, $event);
+          return this.table.$emit(
+            'expand-cell-click',
+            latestData[rowIndex],
+            column,
+            columnIndex,
+            $event,
+          );
         }
       }
       // 行：Hover
@@ -92,7 +110,14 @@ export default {
         });
       }
       if (certainType.cell) {
-        return this.table.$emit(`${type}-${eventType}`, latestData[rowIndex], rowIndex, column, columnIndex, $event);
+        return this.table.$emit(
+          `${type}-${eventType}`,
+          latestData[rowIndex],
+          rowIndex,
+          column,
+          columnIndex,
+          $event,
+        );
       }
       return this.table.$emit(`${type}-${eventType}`, latestData[rowIndex], rowIndex, $event);
     },
@@ -174,7 +199,7 @@ export default {
     function renderCell(row, rowIndex, column, columnIndex) {
       // ExpandType
       if (this.isExpandCell(this.table, columnIndex)) {
-        return <i class='zk-icon zk-icon-angle-right'></i>;
+        return <i class="zk-icon zk-icon-angle-right" />;
       }
       // SelectionType's Checkbox
       if (this.isSelectionCell(this.table, columnIndex)) {
@@ -202,105 +227,151 @@ export default {
             }
           }
         }
-        return <Checkbox
-          indeterminate={ indeterminate }
-          value={ allCheck }
-          onOn-change={ isChecked => this.handleEvent(null, 'checkbox', { row, rowIndex, column, columnIndex }, { isChecked }) }>
-          </Checkbox>;
+        return (
+          <Checkbox
+            indeterminate={indeterminate}
+            value={allCheck}
+            onOn-change={isChecked =>
+              this.handleEvent(
+                null,
+                'checkbox',
+                { row, rowIndex, column, columnIndex },
+                { isChecked },
+              )
+            }
+          />
+        );
       }
       // Tree's firstProp
       if (this.table.treeType && this.table.firstProp === column.prop) {
-        return <span
-          class={ `${this.prefixCls}--level-${row._level}-cell` }
-          style={{
-            marginLeft: `${(row._level - 1) * 24}px`,
-            paddingLeft: row._childrenLen === 0 ? '20px' : '',
-          }}>
-            { row._childrenLen > 0 &&
-              <i 
-                class={ `ivu-icon ivu-icon-ios-arrow-${row._isFold ? 'forward' : 'down'}`}
-                on-click={ $event => this.handleEvent($event, 'icon', { row, rowIndex, column, columnIndex }, { isFold: row._isFold }) }></i>
+        return (
+          <span
+            class={`${this.prefixCls}--level-${row._level}-cell`}
+            on-click={$event =>
+              this.handleEvent(
+                $event,
+                'icon',
+                { row, rowIndex, column, columnIndex },
+                { isFold: row._isFold },
+              )
             }
-            { row[column.prop] ? row[column.prop] : '' }
-        </span>;
+            style={{
+              marginLeft: `${(row._level - 1) * 24}px`,
+              paddingLeft: row._childrenLen === 0 ? '20px' : '',
+            }}
+          >
+            {row._childrenLen > 0 && (
+              <i class={`ivu-icon ivu-icon-ios-arrow-${row._isFold ? 'forward' : 'down'}`} />
+            )}
+            {row[column.prop] ? row[column.prop] : ''}
+          </span>
+        );
       }
       // TreeType children's index
-      if (this.table.showIndex && this.table.treeType && column.prop === '_normalIndex' && row._level > 1) {
+      if (
+        this.table.showIndex &&
+        this.table.treeType &&
+        column.prop === '_normalIndex' &&
+        row._level > 1
+      ) {
         return '';
       }
       if (column.type === undefined || column.type === 'custom') {
-        return  row[column.prop];
-      }
-      else if (column.type === 'ellipsis') {
-        return <div class='ellipsis' title={row[column.prop]}>{row[column.prop]}</div>;
+        return row[column.prop];
+      } else if (column.type === 'ellipsis') {
+        return (
+          <div class="ellipsis" title={row[column.prop]}>
+            {row[column.prop]}
+          </div>
+        );
       } else if (column.type === 'template') {
         return this.table.$scopedSlots[column.template]
-        ? this.table.$scopedSlots[column.template]({ row, rowIndex, column, columnIndex })
-        : '';
+          ? this.table.$scopedSlots[column.template]({ row, rowIndex, column, columnIndex })
+          : '';
       }
       return '';
     }
 
     // Template
     return (
-      <table cellspacing="0" cellpadding="0" border="0" class={ `${this.prefixCls}__body` }>
+      <table cellspacing="0" cellpadding="0" border="0" class={`${this.prefixCls}__body`}>
         <colgroup>
-          { this.table.tableColumns.map(column =>
-            <col width={ column.computedWidth || column.minWidth || column.width }></col>)
-          }
+          {this.table.tableColumns.map(column => (
+            <col width={column.computedWidth || column.minWidth || column.width} />
+          ))}
         </colgroup>
         <tbody>
-          { this.table.bodyData.length > 0
-            ? this.table.bodyData.map((row, rowIndex) =>
-              [
-                <tr
-                  v-show={ !row._isHide }
-                  key={ this.table.rowKey ? getKey(row, rowIndex) : rowIndex }
-                  style={ getStyle.call(this, 'row', row, rowIndex) }
-                  class={ getClassName.call(this, 'row', row, rowIndex) }
-                  on-click={ $event => this.handleEvent($event, 'row', { row, rowIndex }) }
-                  on-dblclick={ $event => this.handleEvent($event, 'row', { row, rowIndex }) }
-                  on-contextmenu={ $event => this.handleEvent($event, 'row', { row, rowIndex }) }
-                  on-mouseenter={ $event => this.handleEvent($event, 'row', { row, rowIndex }, { hover: true }) }
-                  on-mouseleave={ $event => this.handleEvent($event, 'row', { row, rowIndex }, { hover: false }) }>
-                  { this.table.tableColumns.map((column, columnIndex) =>
-                      <td
-                        style={ getStyle.call(this, 'cell', row, rowIndex, column, columnIndex) }
-                        class={ getClassName.call(this, 'cell', row, rowIndex, column, columnIndex) }
-                        on-click={ $event => this.handleEvent($event, 'cell', { row, rowIndex, column, columnIndex }) }
-                        on-dblclick={ $event => this.handleEvent($event, 'cell', { row, rowIndex, column, columnIndex }) }
-                        on-contextmenu={ $event => this.handleEvent($event, 'cell', { row, rowIndex, column, columnIndex }) }
-                        on-mouseenter={ $event => this.handleEvent($event, 'cell', { row, rowIndex, column, columnIndex }) }
-                        on-mouseleave={ $event => this.handleEvent($event, 'cell', { row, rowIndex, column, columnIndex }) }>
-                        <div class={ getClassName.call(this, 'inner', row, rowIndex, column, columnIndex) }>
-                          { renderCell.call(this, row, rowIndex, column, columnIndex) }
-                        </div>
-                      </td>)
-                  }
-                </tr>,
-                this.table.expandType && row._isExpanded &&
-                <tr
-                  key={ rowIndex }
-                  class={ `${this.prefixCls}__body-row ${this.prefixCls}--expand-row` }>
+          {this.table.bodyData.length > 0 ? (
+            this.table.bodyData.map((row, rowIndex) => [
+              <tr
+                v-show={!row._isHide}
+                key={this.table.rowKey ? getKey(row, rowIndex) : rowIndex}
+                style={getStyle.call(this, 'row', row, rowIndex)}
+                class={getClassName.call(this, 'row', row, rowIndex)}
+                on-click={$event => this.handleEvent($event, 'row', { row, rowIndex })}
+                on-dblclick={$event => this.handleEvent($event, 'row', { row, rowIndex })}
+                on-contextmenu={$event => this.handleEvent($event, 'row', { row, rowIndex })}
+                on-mouseenter={$event =>
+                  this.handleEvent($event, 'row', { row, rowIndex }, { hover: true })
+                }
+                on-mouseleave={$event =>
+                  this.handleEvent($event, 'row', { row, rowIndex }, { hover: false })
+                }
+              >
+                {this.table.tableColumns.map((column, columnIndex) => (
                   <td
-                    class={ `${this.prefixCls}--expand-content` }
-                    colspan={ this.table.tableColumns.length }>
-                    { this.table.$scopedSlots.$expand
-                      ? this.table.$scopedSlots.$expand({ row, rowIndex })
-                      : ''
+                    style={getStyle.call(this, 'cell', row, rowIndex, column, columnIndex)}
+                    class={getClassName.call(this, 'cell', row, rowIndex, column, columnIndex)}
+                    on-click={$event =>
+                      this.handleEvent($event, 'cell', { row, rowIndex, column, columnIndex })
                     }
-                   </td>
-                </tr>,
-              ])
-            : <tr
-                class={ `${this.prefixCls}--empty-row` }>
-                <td
-                  class={ `${this.prefixCls}__body-cell ${this.prefixCls}--empty-content` }
-                  colspan={ this.table.tableColumns.length }>
-                  { this.table.emptyText }
-                </td>
-              </tr>
-          }
+                    on-dblclick={$event =>
+                      this.handleEvent($event, 'cell', { row, rowIndex, column, columnIndex })
+                    }
+                    on-contextmenu={$event =>
+                      this.handleEvent($event, 'cell', { row, rowIndex, column, columnIndex })
+                    }
+                    on-mouseenter={$event =>
+                      this.handleEvent($event, 'cell', { row, rowIndex, column, columnIndex })
+                    }
+                    on-mouseleave={$event =>
+                      this.handleEvent($event, 'cell', { row, rowIndex, column, columnIndex })
+                    }
+                  >
+                    <div
+                      class={getClassName.call(this, 'inner', row, rowIndex, column, columnIndex)}
+                    >
+                      {renderCell.call(this, row, rowIndex, column, columnIndex)}
+                    </div>
+                  </td>
+                ))}
+              </tr>,
+              this.table.expandType && row._isExpanded && (
+                <tr
+                  key={rowIndex}
+                  class={`${this.prefixCls}__body-row ${this.prefixCls}--expand-row`}
+                >
+                  <td
+                    class={`${this.prefixCls}--expand-content`}
+                    colspan={this.table.tableColumns.length}
+                  >
+                    {this.table.$scopedSlots.$expand
+                      ? this.table.$scopedSlots.$expand({ row, rowIndex })
+                      : ''}
+                  </td>
+                </tr>
+              ),
+            ])
+          ) : (
+            <tr class={`${this.prefixCls}--empty-row`}>
+              <td
+                class={`${this.prefixCls}__body-cell ${this.prefixCls}--empty-content`}
+                colspan={this.table.tableColumns.length}
+              >
+                {this.table.emptyText}
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     );
